@@ -701,6 +701,13 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
+# Additional Application Debug Settings
+#
+# default:
+# CONFIG_APP_DEBUG_MODE is not set
+# end of Additional Application Debug Settings
+
+#
 # Compiler options
 #
 CONFIG_COMPILER_OPTIMIZATION_DEBUG=y
