@@ -25,7 +25,3 @@ all options in Kconfig.projbuild
 
 [ESP32-With-ESP-PROG-Demo](https://github.com/PBearson/ESP32-With-ESP-PROG-Demo) github project
 
-
----
-
-[← Back to README](../README.md)

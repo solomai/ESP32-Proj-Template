@@ -9,7 +9,3 @@ Use the `run_device_tests.py` script to run tests on the hardware. This requires
 Before execution, you must install the necessary Python dependencies; for convenience, use the `tests/install_tests_deps.bat` script.<br>
 Note: that the `Device Monitor` must be closed while the script is running, as it occupies the COM port required for testing.
 
-
----
-
-[← Back to README](../README.md)
