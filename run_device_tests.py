@@ -6,9 +6,12 @@ Builds, flashes and runs each test group sequentially,
 collects and prints a summary.
 
 Usage:
-    python run_device_tests.py
+    python run_device_tests.py                  # run all tests
+    python run_device_tests.py test_diagnostics # run one group
+    python run_device_tests.py test_comp*       # run by mask
 """
 
+import fnmatch
 import json
 import os
 import re
@@ -17,7 +20,7 @@ import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import serial
 
@@ -123,6 +126,23 @@ def discover_test_groups() -> List[Path]:
         sys.exit(f"{COLOR_RED}[ERROR] No test groups found in {TESTS_DIR}{COLOR_RESET}")
 
     return groups
+
+
+def filter_test_groups(groups: List[Path], pattern: Optional[str]) -> List[Path]:
+    """Filter groups by name using fnmatch pattern. None = return all."""
+    if pattern is None:
+        return groups
+
+    matched = [g for g in groups if fnmatch.fnmatch(g.name, pattern)]
+
+    if not matched:
+        available = ", ".join(g.name for g in groups)
+        sys.exit(
+            f"{COLOR_RED}[ERROR] No test groups match pattern '{pattern}'.\n"
+            f"        Available groups: {available}{COLOR_RESET}"
+        )
+
+    return matched
 
 
 def build_and_flash(test_dir: Path, port: str, idf_py: Path,
@@ -240,16 +260,24 @@ def print_summary(results: List[TestResult]) -> None:
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
+    # Optional positional argument: filter pattern (supports * mask).
+    # PowerShell and cmd.exe do NOT expand globs, so sys.argv[1] always
+    # arrives as the literal string the user typed (e.g. "test_sys*").
+    pattern = sys.argv[1] if len(sys.argv) > 1 else None
+
     idf_py = get_idf_py()
     python  = get_idf_python()
     env     = get_idf_env()
     port    = get_serial_port()
     groups  = discover_test_groups()
+    groups  = filter_test_groups(groups, pattern)
 
     print(f"[INFO] IDF_PATH : {env['IDF_PATH']}")
     print(f"[INFO] Python   : {python}")
     print(f"[INFO] idf.py   : {idf_py}")
-    print(f"[INFO] Found {len(groups)} test group(s): "
+    if pattern:
+        print(f"[INFO] Filter   : {pattern}")
+    print(f"[INFO] Running {len(groups)} test group(s): "
           f"{', '.join(g.name for g in groups)}")
 
     results: List[TestResult] = []
